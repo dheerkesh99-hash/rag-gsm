@@ -1,0 +1,477 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# brand_map.yaml — GSM Outdoors brand configuration
+# ─────────────────────────────────────────────────────────────────────────────
+# This file is the SINGLE SOURCE OF TRUTH for:
+#   - Brand names and all their aliases / model names
+#   - Category keywords (words that identify a category without naming a brand)
+#   - Product types within each category
+#   - Ops keywords (bypass brand gate entirely)
+#   - Catalogue keywords (general questions, no brand needed)
+#
+# HOW TO ADD A NEW BRAND:
+#   1. Find the right category (fishing / hunting / wireless) or add a new one
+#   2. Add the brand name to the brands list
+#   3. Add all model names and common misspellings to brand_aliases
+#   4. No code changes needed — brand_gate.py reloads this file automatically
+#
+# HOW TO ADD A NEW CATEGORY:
+#   1. Add a new top-level key under categories:
+#   2. Fill in brands, keywords, products, brand_aliases
+#   3. Create the corresponding wiki subfolder
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Ops keywords — bypass brand gate entirely ─────────────────────────────────
+# Questions matching any of these go straight to agent-operations.md (2026-05-21: page not yet created — ops bypass currently routes to general wiki retrieval)
+ops_keywords:
+  # Support hours / contact
+  - hours
+  - holiday
+  - schedule
+  - when are you open
+  - are you open
+  - contact
+  - phone number
+  - email address
+  - support hours
+  - closed
+  - open today
+  - 8 am
+  - cst
+  # Dealer / wholesale
+  # - dealer   # commented out: too broad — "warranty through a dealer" was bypassing brand gate
+  - wholesale
+  - distributor
+  - become a dealer
+  - bass pro
+  - cabela
+  - bc order
+  - unit of measure
+  # Catalogue / overview — no brand needed to answer
+  - how many brands
+  - what brands
+  - which brands
+  - brands do you carry
+  - brands you carry
+  - brands you sell
+  - brands you offer
+  - what products
+  - which products
+  - products do you carry
+  - products you carry
+  - products you sell
+  - products you offer
+  - what do you sell
+  - what do you carry
+  - what do you offer
+  - tell me about gsm
+  - about gsm
+  - what is gsm
+  - overview
+  - catalogue
+  - catalog
+  - full list
+
+# ── Catalogue keywords — suppress brand context even if brand is in session ───
+# These questions need a general answer regardless of confirmed brand
+catalogue_keywords:
+  - how many brands
+  - what brands
+  - which brands
+  - brands do you carry
+  - brands you carry
+  - brands you sell
+  - what products
+  - which products
+  - products do you carry
+  - what do you sell
+  - what do you carry
+  - tell me about gsm
+  - overview
+  - catalogue
+  - catalog
+  - full list
+  - how many
+  - list all
+  - what all
+
+# ── Categories ────────────────────────────────────────────────────────────────
+categories:
+
+  fishing:
+    brands:
+      - Phenix Rods
+      - Dobyns Rods
+      - Bucca Brand
+      - Bonehead Tackle
+      # - Northland Tackle   # 2026-05-22: wiki pages not yet created — hidden from brand gate list
+
+    # Words that identify this category without naming a brand
+    keywords:
+      - rod
+      - rods
+      - reel
+      - fishing
+      - lure
+      - bait
+      - baits
+      - tip
+      - tip guide
+      - running guide
+      - blank
+      - logo section
+      - trick shad
+      - prostaff
+      - pro staff
+      - tier fee
+      - warranty form
+      - casting rod
+      - spinning rod
+      - fishing rod
+      - rod tip
+      - return
+      - refund
+      - replacement
+      - broken rod
+      - snapped
+      - damaged rod
+      - wrong rod
+      - incorrect rod
+      - exchange
+
+    # Product types shown in S1 clarification question
+    products:
+      - Fishing rods
+      - Rod blanks / sections
+      - Baits and lures
+      - Rod guides / tips (replacement parts)
+
+    # Brand aliases — exact substrings AND fuzzy match targets
+    # Add every model name, common misspelling, and abbreviation here
+    brand_aliases:
+      Phenix Rods:
+        - phenix
+        - phenix rods
+        - phx
+        - no-hassle
+        - boron legacy
+        # Saltwater pelagic series
+        - abyss
+        - abyss hd
+        - axis
+        - black diamond
+        - black diamond hybrid
+        - black diamond surf
+        - black diamond inshore
+        - black diamond east coast
+        - pandora
+        # Saltwater inshore series
+        - m1 inshore
+        - rts inshore
+        - titan popping
+        - titan slow
+        - megalodon
+        # Freshwater bass series
+        - m1 bass
+        - m1
+        - feather
+        - feather ftx
+        - ultra mbx
+        - umbx
+        - ultra swimbait
+        - k2
+        - classic bfs
+        # Freshwater specialty series
+        - kokanee
+        - kokanee reaper
+        - maxim
+        - recon elite
+        - crankbait xg
+        - crankbait composite
+        - crankbait
+        - black chrome
+        - super flipper
+        - m1 walleye
+        - walleye rod
+        # Salmon & steelhead series
+        - cicada
+        - trifecta
+        - trifecta pro
+        - trifecta lite
+        # Trout & ultralight series
+        - iron feather
+        - elixir
+        - mirage
+        - dragonfly
+        # Travel series
+        - redeye
+        # Other
+        - virtus
+        - hybrid
+        - bermuda
+        - fx701
+        # Common misspellings (fuzzy match will also catch these,
+        # but listing them ensures exact match works too)
+        - phenyx
+        - phinix
+        - phoenix rods
+
+      Dobyns Rods:
+        - dobyns
+        - dobyns rods
+        - dobyns rod
+        - gary dobyns
+        # Series names
+        - xtasy
+        - champion
+        - champion extreme
+        - champion xp
+        - kaden
+        - kaden travel
+        - sierra
+        - sierra micro
+        - sierra ultra finesse
+        - sierra trout
+        - fury
+        - colt
+        # Signature series — use "rod" qualifier to avoid cross-match with Bucca Brand lures
+        - josh jones
+        - eric cagle
+        - sam sobi
+        - bullshad rod      # Dobyns MB (Mike Bucca BullShad) rod — "mike bucca" alone stays Bucca Brand
+        - mb bullshad
+        - ec special
+        # Lure / tackle products
+        - d-blade
+        - d-swim
+        - d-nail
+        # Maverick Reels is Dobyns' bundled reel brand — route to Dobyns pages
+        - maverick reel
+        - maverick reels
+        - maverick
+        - mv 2000
+        - mv 2500
+        # Misspellings
+        - dobins
+        - dobyn
+        - dobbyns
+
+      Bonehead Tackle:
+        - bonehead
+        - bonehead tackle
+        - e-series
+        - carbon fiber rod
+        - bhx
+        # Misspellings
+        - bone head
+        - bonehed
+
+      Bucca Brand:
+        - bucca
+        - bucca brand
+        - trick shad
+        - buc-ts
+        # Misspellings
+        - buca
+        - bucka
+
+      Northland Tackle:
+        - northland
+        - northland tackle
+        - northland rod
+        # Misspellings
+        - northlands
+        - north land
+
+  hunting:
+    brands:
+      - WGI / Wildgame Innovations
+      - Boss Buck
+      - Avian-X
+      - SOG Knives
+      - Muddy
+      - Hawk
+      - Walker's Ear Protection
+      - Bloodsport
+
+    keywords:
+      - feeder
+      - timer
+      - decoy
+      - blind
+      - knife
+      - knives
+      - stand
+      - ladder stand
+      - treestand
+      - tree stand
+      - ear protection
+      - game ear
+      - hearing
+      - muffs
+      - nrr
+      - arrow
+      - outsert
+      - hunting
+      - spinner
+      - motor
+      - battery
+      - dispense
+      - feeder error
+      - feeder jam
+      - feeder motor
+      - replacement part
+      - hunting blind
+      - box blind
+      - return
+      - refund
+      - replacement
+      # - warranty   # removed: too generic — "warranty" alone matches any category; bare warranty queries should ask category first
+
+    products:
+      - Wildlife feeders and timers (WGI, Boss Buck)
+      - Decoys and hunting blinds (Avian-X)
+      - Knives and cutlery (SOG)
+      - Treestands and replacement parts (Muddy, Hawk)
+      - Ear protection (Walker's)
+      - Arrows and outserts (Bloodsport)
+
+    brand_aliases:
+      WGI / Wildgame Innovations:
+        - wgi
+        - wildgame
+        - wildgame innovations
+        - th-270
+        - th-dx1
+        - ah-series
+        - xde
+        - xa series
+        # Misspellings
+        - wild game
+        - wildgames
+
+      Boss Buck:
+        - boss buck
+        - bossbuck
+        # Misspellings
+        - boss bucks
+        - bossbucks
+
+      Avian-X:
+        - avian
+        - avian-x
+        - avian x
+        - avianx
+        - lcd mallard
+        - a-frame blind
+        - lcd valve
+        # Misspellings
+        - avian x
+        - avianex
+
+      SOG Knives:
+        - sog
+        - sog knife
+        - sog knives
+        - cutlery
+        - blade
+        - engraving
+        - sog sku
+        # Misspellings
+        - sogg
+
+      Muddy:
+        - muddy
+        - muddy treestand
+        - muddy stand
+        # Misspellings
+        - mudy
+
+      Hawk:
+        - hawk
+        - hawk ladder
+        - hawk stand
+        # Misspellings
+        - hawke
+
+      Walker's Ear Protection:
+        - walker
+        - walkers
+        - walker's
+        - game ear
+        - nrr
+        - ear muff
+        - hearing protection
+        # Misspellings
+        - walkers game ear
+        - walkrs
+
+      Bloodsport:
+        - bloodsport
+        - outsert
+        - bloodsport arrow
+        # Misspellings
+        - blood sport
+        - bloodsports
+
+  wireless:
+    brands:
+      - Connect Cellular
+      - Muddy MTRX
+      - Stealth Cam
+
+    keywords:
+      - camera
+      - trail cam
+      - cellular camera
+      - wireless camera
+      - trail camera
+      - game camera
+      - sim card
+      - sd card
+      - data plan
+      - app
+      - signal
+      - led
+      - sync button
+      - antenna
+      - solar panel
+      - cellular
+      - wireless
+      - return
+      - refund
+      - replacement
+      # - warranty   # removed: too generic — bare warranty queries should ask category first
+
+    products:
+      - Connect Cellular / Maneuver cameras
+      - Muddy MTRX cameras
+      - Stealth Cam STC-DS4KTM
+
+    brand_aliases:
+      Connect Cellular:
+        - connect
+        - connect cellular
+        - maneuver
+        - connect cam
+        - maneuver camera
+        # Misspellings
+        - connect celular
+        - conect cellular
+
+      Muddy MTRX:
+        - mtrx
+        - muddy mtrx
+        - mud-mtrx
+        - mtrx camera
+        # Misspellings
+        - muddy mtrx
+
+      Stealth Cam:
+        - stealth cam
+        - stc-ds4k
+        - ds4ktm
+        - stealthcam
+        - stealth camera
+        # Misspellings
+        - stealth camm
+        - stealthcam

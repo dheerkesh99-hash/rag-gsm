@@ -2,8 +2,8 @@
 .env
 *.env
 
-# Generated vector database (rebuild with: python vector_store.py --build)
-wiki/.vectors.db
+# Generated files (vector DB is committed so Railway has it pre-built)
+# wiki/.vectors.db  ← included in repo intentionally for deployment
 .vector_store.npz
 .vector_store_hash.json
 

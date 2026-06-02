@@ -26,6 +26,8 @@ from dotenv import load_dotenv
 
 from wiki_retrieval import SKIP_PAGES as _SKIP_PAGES, build_wiki_context as _wr_build_wiki_context
 import brand_gate as _brand_gate
+import wismo_gate as _wismo_gate
+import crm_client as _crm_client
 
 load_dotenv()
 
@@ -557,6 +559,7 @@ async def on_start():
 
     cl.user_session.set("history", [])
     cl.user_session.set("gate", _brand_gate.get_session_defaults())
+    cl.user_session.set("wismo", _wismo_gate.get_session_defaults())
 
     settings = await cl.ChatSettings(
         [
@@ -616,6 +619,67 @@ async def on_message(message: cl.Message):
     if user_text.startswith("/"):
         await _handle_command(user_text)
         return
+
+    # ── WISMO intercept (runs before RAG pipeline) ────────────────────────────
+    _wismo_session = cl.user_session.get("wismo") or _wismo_gate.get_session_defaults()
+    _ws = _wismo_gate.from_session(_wismo_session)
+
+    # Detect fresh WISMO intent (only when not already in a WISMO flow)
+    if _ws.state == _wismo_gate.STATE_IDLE and _wismo_gate.detect_wismo(user_text):
+        if not _crm_client.is_configured():
+            # D365 not configured — fall through to RAG (no CRM available)
+            pass
+        else:
+            _ws.state = _wismo_gate.STATE_AWAIT_PII
+            cl.user_session.set("wismo", _wismo_gate.to_session(_ws))
+            await cl.Message(content=_wismo_gate.ask_for_pii()).send()
+            return
+
+    # Handle active WISMO flow (PII collection + CRM lookup)
+    elif _ws.state in (_wismo_gate.STATE_AWAIT_PII, _wismo_gate.STATE_AWAIT_RETRY):
+        _email = _wismo_gate.extract_email(user_text)
+        _phone = _wismo_gate.extract_phone(user_text)
+        _name  = _wismo_gate.extract_name(user_text)
+
+        if not any([_email, _phone, _name]):
+            # User typed something but no identifier found — retry up to limit
+            _ws.pii_attempts += 1
+            if _ws.pii_attempts >= _wismo_gate.MAX_PII_ATTEMPTS:
+                _ws.state = _wismo_gate.STATE_ESCALATED
+                cl.user_session.set("wismo", _wismo_gate.to_session(_ws))
+                await cl.Message(content=_wismo_gate.escalation_message()).send()
+            else:
+                _ws.state = _wismo_gate.STATE_AWAIT_RETRY
+                cl.user_session.set("wismo", _wismo_gate.to_session(_ws))
+                await cl.Message(content=_wismo_gate.ask_for_pii_retry()).send()
+            return
+
+        # Identifier extracted — call CRM (sync wrapped for async handler)
+        _result = await cl.make_async(_crm_client.lookup_customer_orders)(
+            email=_email, phone=_phone, name=_name
+        )
+
+        if _result.get("status") == "not_found":
+            _ws.pii_attempts += 1
+            if _ws.pii_attempts >= _wismo_gate.MAX_PII_ATTEMPTS:
+                _ws.state = _wismo_gate.STATE_ESCALATED
+                cl.user_session.set("wismo", _wismo_gate.to_session(_ws))
+                await cl.Message(content=_wismo_gate.escalation_message()).send()
+            else:
+                _ws.state = _wismo_gate.STATE_AWAIT_RETRY
+                cl.user_session.set("wismo", _wismo_gate.to_session(_ws))
+                await cl.Message(content=_wismo_gate.ask_for_pii_retry()).send()
+            return
+
+        # All other outcomes (found, ambiguous, no_orders, api_error) — respond and close flow
+        _reply = _wismo_gate.format_order_result(_result)
+        if _reply:
+            _ws.state = _wismo_gate.STATE_RESOLVED
+            cl.user_session.set("wismo", _wismo_gate.to_session(_ws))
+            await cl.Message(content=_reply).send()
+            return
+        # If format_order_result returned None (shouldn't happen) — fall through to RAG
+    # ── End WISMO intercept ───────────────────────────────────────────────────
 
     history: list[dict] = cl.user_session.get("history") or []
     history.append({"role": "user", "content": user_text})
